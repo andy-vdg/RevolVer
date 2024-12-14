@@ -19,6 +19,13 @@ Before each usage, a HAR file must be exported from Revolut web application and 
 4. In developer tools, go to Network tab and export HAR:  
 <img src="screenshots/export_har.png" width="500">
 
+** NOTE: As of 30 September 2024, Chromium-based browsers (Chrome, Edge, etc) [by default will not include all required headers when exporting HAR file](https://developer.chrome.com/blog/new-in-devtools-130). If you don't see option "Export HAR (with sensitive data)", make sure to enable it in settings else the script will fail with `ERROR - Could not find authentication data from HAR file` **  
+
+4.a. Enable "Export HAR (with sensitive data)" in Edge (it's similar with other Chromium-based browsers as well):  
+<img src="screenshots/enable_sensitive_har.png" width="600">
+
+Now you can long-press Download button to reveal option "Export HAR (with sensitive data)"  
+
 5. Save the file "app.revolut.com.har" to `consume/` directory. Do not change the filename.  
 6. Proceed by running the script right away as the authentication data tend to expire fast.  
 
