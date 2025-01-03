@@ -23,10 +23,10 @@ class Logging:
         logger = logging.getLogger('revol_ver')
         if duplicates:
             logger.warning(f'Skipped {len(duplicates)} out of {count_all} transactions because they are already in the database')
-            logger.debug(f'Duplicated legIds:\n{"\n".join(duplicates)}')
+            logger.debug('Duplicated legIds:\n{}'.format('\n'.join(duplicates)))
         if not_correct_month:
             logger.warning(f'Skipped {len(not_correct_month)} out of {count_all} transactions because they are outside of target period')
-            logger.debug(f'Out of period legIds:\n{"\n".join(not_correct_month)}')
+            logger.debug('Out of period legIds:\n{}'.format('\n'.join(not_correct_month)))
         logger.info(f'Found {count_success} transactions')
         if count_success == 0:
             logger.warning('No transactions to save, quitting..')
