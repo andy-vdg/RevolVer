@@ -64,6 +64,10 @@ class TransactionModel(BaseModel):
             return cat
         pretty_cat = custom_categories_map.get(cat)
         if not pretty_cat:
-            raise Exception(f'\nCategory with ID {cat} was not found. Full transaction:\n{str(trans)}')
+            # An unmapped custom category no longer stops the export: keep a stable placeholder
+            # and warn, so it can be named in config.ini later without losing the run.
+            pretty_cat = f'custom_{cat[:8]}'
+            logger.warning(f'Custom category {cat} is not in config.ini [custom.categories]; using {pretty_cat}')
+            return pretty_cat
         logger.debug(f'Resolved category ID {cat} to {pretty_cat}')
         return pretty_cat

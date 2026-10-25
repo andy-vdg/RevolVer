@@ -94,17 +94,12 @@ or
     Reason and fix: Authentication data has expired. Copy a fresh curl command or export a new HAR file and try again.  
 
 3. **Custom category not defined**
-   ```
-   Exception:
-   Category with ID aead2528-4b7b-481d-bc1f-0f27ec4b3926 was not found. Full transaction:
-   ValidationInfo(config={'title': 'TransactionModel'}, context=None, data={'id': '66xxxxab-0e30-axxe-8cc6-791xxxxxxx4b', 'legId': '66xxxxab-0e30-axxe-0000-791xxxxxxx4b', 'type': 'CARD_PAYMENT', 'state': 'COMPLETED', 'startedDate': datetime.datetime(2024, 8, 2, 15, 44, 10), 'updatedDate': datetime.datetime(2024, 8, 3, 13, 13, 38, 150000), 'completedDate': datetime.datetime(2024, 8, 3, 13, 13, 38, 149000), 'createdDate': datetime.datetime(2024, 8, 2, 15, 44, 11, 198000), 'currency': 'EUR', 'amount': -1213.0, 'fee': 0.0, 'balance': 9999.0, 'description': 'Merkur Lj. Vizmarje', 'tag': 'shopping'}, field_name='category')
-   ```
 
-    Reason and fix: The script refuses to proceed if Revolut transaction with custom category is not defined in `config.ini`. To fix this specific example, an entry with UUID and custom category name must be added to `custom.categories` section of file `config.ini`:
+    A transaction with a custom category whose UUID is not in `config.ini` no longer stops the export. It is saved with a placeholder category `custom_<first 8 characters of the UUID>`, and a warning names the UUID. To show your own name instead, add the UUID to the `custom.categories` section of `config.ini` and export again:
 
     ```
     [custom.categories]
-    aead2528-4b7b-481d-bc1f-0f27ec4b3926 = home_improvements   
+    aead2528-4b7b-481d-bc1f-0f27ec4b3926 = home_improvements
     ```
 
     With custom categories configured, the script will use this mapping to transform the UUID returned by Revolut to defined category name which is visible in column `category` in both database table and Excel.

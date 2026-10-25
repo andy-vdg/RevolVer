@@ -71,9 +71,8 @@ class TestTransactionModel:
         }
          # Ensure it's not in the map
          with patch.dict(models.custom_categories_map, {}, clear=True):
-             with pytest.raises(Exception) as exc:
-                 models.TransactionModel(**data)
-             assert f'Category with ID {uuid_like} was not found' in str(exc.value)
+             model = models.TransactionModel(**data)
+             assert model.category == f'custom_{uuid_like[:8]}'
 
     def test_date_conversion_none(self, caplog):
         # Test when date is None/0
