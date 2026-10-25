@@ -51,6 +51,23 @@ class TestInputs:
              assert wallet == 'wallet1'
              assert acct == 'personal'
 
+    def test_get_auth_data_curl_url_flag(self):
+        # Newer Chrome copies the request as `curl --url '<url>' ...`
+        curl_content = "curl --url 'https://app.revolut.com/api?internalPocketId=pocket1&walletId=wallet1' -b 'cookie=123' -H 'x-device-id: dev1' -H 'referer: 'https://app.revolut.com?accountType=personal&other=1'"
+
+        abs_root_path = MagicMock()
+        input_file_mock = MagicMock()
+        abs_root_path.__truediv__.return_value = input_file_mock
+
+        input_file_mock.exists.return_value = True
+        input_file_mock.stat.return_value.st_size = 100
+
+        with patch('builtins.open', mock_open(read_data=curl_content)):
+             found, cookie, dev, pocket, wallet, acct = Inputs.get_auth_data(abs_root_path)
+             assert found is True
+             assert pocket == 'pocket1'
+             assert wallet == 'wallet1'
+
     def test_get_auth_data_curl_not_curl_command(self):
         # curlcmd.txt exists but doesn't start with curl
         abs_root_path = MagicMock()

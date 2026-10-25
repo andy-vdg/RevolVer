@@ -70,7 +70,8 @@ class Inputs:
         account_type: str = ''
         
         # Extract URL - works for both bash ('url') and cmd ("url")
-        url_match = re.search(r"curl\s+['\"]([^'\"]+)", curl_content)
+        # Newer Chrome copies the request as `curl --url '<url>' ...`; accept both forms.
+        url_match = re.search(r"curl\s+(?:--url\s+)?['\"]([^'\"]+)", curl_content)
         if not url_match:
             logger.error('Could not find URL in curl command')
             return False, '', '', '', '', ''
