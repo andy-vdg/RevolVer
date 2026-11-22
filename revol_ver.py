@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime
 from logging import Logger
 from pathlib import Path
 
@@ -65,7 +66,8 @@ def read_inputs(source: str, period: str, epoch: int,
     count = len(transactions)
     return transactions, count
 
-def process(trans: list[dict], period: str, month: int, existing_ids: list[str] = None) -> tuple[list[dict], int]:
+def process(trans: list[dict], period: str, month: int, existing_ids: list[str] = None,
+            year: int | None = None) -> tuple[list[dict], int]:
     if existing_ids is None:
         existing_ids = []
     count_all = len(trans)
@@ -82,7 +84,8 @@ def process(trans: list[dict], period: str, month: int, existing_ids: list[str] 
         if transaction.legId in existing_ids:
             duplicates.append(transaction.legId)
             continue
-        if period == 'month' and transaction.startedDate.month != month:
+        if period == 'month' and (transaction.startedDate.month != month
+                                  or (year is not None and transaction.startedDate.year != year)):
             not_correct_month.append(transaction.legId)
             continue
         transactions.append(transaction)
@@ -167,7 +170,10 @@ def main() -> None:
         return
     existing_ids, db_output = db_instance_and_existing_records(options.dont_deduplicate,
                                                                options.output)
-    transactions, count = process(transactions, options.period, options.month, existing_ids)
+    # The month filter must match the year too: Revolut pages can reach back into
+    # the same month of earlier years.
+    year = datetime.fromtimestamp(options.epoch / 1000).year if options.epoch else None
+    transactions, count = process(transactions, options.period, options.month, existing_ids, year)
     if count == 0:
         return
     if options.decimal_amounts:
