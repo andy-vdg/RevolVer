@@ -149,7 +149,7 @@ class WebRequests:
         return (t.get('id'), t.get('legId'))
 
     @classmethod
-    def get_all_transactions(cls, cookie: str, device_id: str, pocket_id:str = '', wallet_id: str = '', account_type: str = '') -> list[dict]:
+    def get_all_transactions(cls, cookie: str, device_id: str, pocket_id:str = '', wallet_id: str = '', account_type: str = '', lookback_years: int | None = None) -> list[dict]:
         '''
         Revolut will take epoch and return certain number of results BEFORE this date.
         This function generates epochs for each month and fetches transactions
@@ -157,7 +157,7 @@ class WebRequests:
         transactions = []
         logger.info('Fetching all transactions')
         seen = set()
-        for epoch in cls.generate_dates():
+        for epoch in cls.generate_dates(lookback_years):
             for t in cls.fetch_month(cookie=cookie, device_id=device_id, epoch=epoch, pocket_id=pocket_id, wallet_id=wallet_id, account_type=account_type):
                 if cls.trans_key(t) not in seen:
                     seen.add(cls.trans_key(t))
@@ -165,13 +165,15 @@ class WebRequests:
         return transactions
 
     @classmethod
-    def generate_dates(cls) -> list[int]:
+    def generate_dates(cls, lookback_years: int | None = None) -> list[int]:
         '''
         Generates epochs for all months from current to the whatever is set in config.ini
         '''
         now = datetime.now()
         end_year = now.year
-        start_year = end_year - int(Inputs.get_ini_config('other').get('allimportlookbackyears', 2))
+        if lookback_years is None:
+            lookback_years = int(Inputs.get_ini_config('other').get('allimportlookbackyears', 2))
+        start_year = end_year - int(lookback_years)
         end_month = now.month
         logger.info(f'Preparing epoch timestamps of last day of month for months between years {start_year} and {end_year}')
         dates = []

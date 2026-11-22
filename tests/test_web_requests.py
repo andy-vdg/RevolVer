@@ -188,6 +188,26 @@ class TestWebRequests:
                                                            'code': 9039}
                 with pytest.raises(SystemExit) as exc:
                     WebRequests.fetch_pockets(cookie='c', device_id='d')
+
+    def test_generate_dates_lookback_argument_overrides_config(self):
+        'An explicit --lookback-years wins over config.ini and does not read it.'
+        with patch('lib.inputs.Inputs.get_ini_config') as mock_config:
+            with patch('lib.web_requests.datetime') as mock_datetime:
+                mock_datetime.now.return_value = datetime(2023, 1, 15)
+                dates = WebRequests.generate_dates(lookback_years=2)
+        # 2021 and 2022 in full, plus January 2023
+        assert len(dates) == 25
+        mock_config.assert_not_called()
+
+    def test_fetch_trans_error_response_is_logged_and_exits(self, caplog):
+        'An error payload (e.g. expired token) is logged, then the run stops.'
+        with patch('lib.web_requests.WebRequests.load_headers_from_curl', return_value={}):
+            with patch('lib.web_requests.requests.get') as mock_get:
+                mock_get.return_value.json.return_value = {
+                    'message': 'Access token expired', 'code': 9039
+                }
+                with pytest.raises(SystemExit) as exc:
+                    WebRequests.fetch_trans(cookie='c', device_id='d', pocket_id='p')
         assert exc.value.code == 1
         assert 'Access token expired' in caplog.text
 
@@ -201,4 +221,6 @@ class TestWebRequests:
                 ]
                 rows = WebRequests.fetch_trans(cookie='c', device_id='d', wallet_id='w')
         assert rows[0]['cardLastFour'] == '4321'
+
+        assert rows[0]['cardLabel'] == 'Main card'
         assert 'cardLastFour' not in rows[1]
